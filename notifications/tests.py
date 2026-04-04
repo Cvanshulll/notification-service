@@ -28,6 +28,32 @@ class NotificationServiceTest(TestCase):
             'Hello John, welcome to our platform!'
         )
 
+    def test_render_template_unknown_template(self):
+        """Test unknown template name triggers a ValueError"""
+        with self.assertRaises(ValueError):
+            NotificationService.render_template('invalid_template', {'name': 'John'})
+
+    def test_render_template_missing_variable(self):
+        """Test template rendering with missing variables"""
+        message = NotificationService.render_template('welcome', {})
+        self.assertEqual(
+            message,
+            'Hello {{name}}, welcome to our platform!'
+        )
+
+    def test_user_preference_unsupported_channel(self):
+        """Unsupported channels should not be considered enabled for saved preferences"""
+        UserPreference.objects.create(
+            user_id='test_user',
+            email_enabled=True,
+            sms_enabled=True,
+            push_enabled=True
+        )
+
+        self.assertFalse(
+            NotificationService.check_user_preference('test_user', 'fax')
+        )
+
     def test_rate_limit(self):
         """Test rate limiting"""
         user_id = 'test_user'
@@ -86,7 +112,7 @@ class NotificationAPITest(APITestCase):
         self.assertEqual(response.data['user_id'], 'user123')
         self.assertEqual(response.data['status'], 'pending')
 
-    def test_idempotency(self):
+    def test_duplicate_request(self):
         """Test duplicate requests with same idempotency key"""
         data = {
             'user_id': 'user123',
@@ -104,6 +130,52 @@ class NotificationAPITest(APITestCase):
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
 
         self.assertEqual(response1.data['id'], response2.data['id'])
+
+    def test_create_notification_missing_message_and_template(self):
+        """Missing both message and template should return a validation error"""
+        data = {
+            'user_id': 'user123',
+            'channel': 'email',
+            'priority': 'high'
+        }
+
+        response = self.client.post('/api/notifications/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('non_field_errors', response.data)
+        self.assertIn("Either 'message' or 'template_name' is required", response.data['non_field_errors'][0])
+
+    def test_create_notification_invalid_channel(self):
+        """Invalid channel choice should return a serializer error"""
+        data = {
+            'user_id': 'user123',
+            'channel': 'fax',
+            'message': 'Test'
+        }
+
+        response = self.client.post('/api/notifications/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('channel', response.data)
+
+    def test_create_notification_user_opted_out(self):
+        """Users who opt out should receive a 400 response"""
+        UserPreference.objects.create(
+            user_id='user123',
+            email_enabled=False
+        )
+
+        data = {
+            'user_id': 'user123',
+            'channel': 'email',
+            'message': 'Test'
+        }
+
+        response = self.client.post('/api/notifications/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+        self.assertIn('opted out', response.data['error'])
 
     def test_rate_limit(self):
         """Test rate limiting"""
@@ -165,3 +237,25 @@ class UserPreferenceAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email_enabled'], False)
+
+    def test_update_existing_preferences(self):
+        """Updating an existing preference record should return 200"""
+        UserPreference.objects.create(
+            user_id='user123',
+            email_enabled=True,
+            sms_enabled=True,
+            push_enabled=False
+        )
+
+        data = {
+            'user_id': 'user123',
+            'email_enabled': False,
+            'sms_enabled': False,
+            'push_enabled': True
+        }
+
+        response = self.client.post('/api/preferences/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email_enabled'], False)
+        self.assertEqual(response.data['push_enabled'], True)
