@@ -1,0 +1,166 @@
+{
+  "info": {
+    "_postman_id": "ce5debf9-d57f-4422-8ac8-1de65befc089",
+    "name": "Notification Service API",
+    "description": "API collection for Notification Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25347643"
+  },
+  "item": [
+    {
+      "name": "Send Simple Notification",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"john123\",\n  \"channel\": \"email\",\n  \"priority\": \"high\",\n  \"message\": \"Hello John!\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/notifications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "notifications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Send Template Notification",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"john123\",\n  \"channel\": \"email\",\n  \"priority\": \"high\",\n  \"message\": \"Hello John!\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/notifications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "notifications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Notification",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/notifications/1/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "notifications",
+            "1",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User Notifications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/notifications/user/john123/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "notifications",
+            "user",
+            "john123",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set Preferences",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"john123\",\n  \"email_enabled\": true,\n  \"sms_enabled\": false,\n  \"push_enabled\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/preferences/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "preferences",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Preferences",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/preferences/john123/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "preferences",
+            "john123",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
