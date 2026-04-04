@@ -98,20 +98,24 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
     lookup_field = 'user_id'
 
     def create(self, request):
-        """POST /preferences - Set user preferences"""
+        user_id = request.data.get('user_id')
 
-        serializer = UserPreferenceSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            instance = UserPreference.objects.get(user_id=user_id)
 
-        user_id = serializer.validated_data['user_id']
+            serializer = self.get_serializer(
+                instance,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-        # Update or create
-        prefs, created = UserPreference.objects.update_or_create(
-            user_id=user_id,
-            defaults=serializer.validated_data
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(
-            UserPreferenceSerializer(prefs).data,
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        )
+        except UserPreference.DoesNotExist:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
