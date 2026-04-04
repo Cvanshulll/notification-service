@@ -50,13 +50,6 @@ docker-compose exec web python manage.py migrate
 
 ---
 
-### 4. Create superuser (optional)
-
-```
-docker-compose exec web python manage.py createsuperuser
-```
-
----
 
 ## API Testing
 
