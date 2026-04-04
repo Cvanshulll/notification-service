@@ -56,10 +56,12 @@ class PriorityTask(Task):
     def apply_async(self, *args, **kwargs):
         # Extract notification_id
         notification_id = args[0] if args else kwargs.get('notification_id')
+        
+        # Handle case where notification_id can be a tuple
         if isinstance(notification_id, tuple):
             notification_id = notification_id[0]
 
-        notification = Notification.objects.get(id=notification_id)
+        # notification = Notification.objects.get(id=notification_id)
 
         if notification_id:
             try:
