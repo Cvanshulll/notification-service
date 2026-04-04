@@ -109,6 +109,17 @@ POST /api/notifications/
 
 ## Running Tests
 
+
+#### For dockerized setup:
+```
+docker-compose exec web python manage.py test
+```
+
+#### For local setup: 
+
+
+Note: Make sure to set up the local environment variables and database before running tests.
+
 ```
 python manage.py test
 ```
